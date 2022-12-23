@@ -53,8 +53,13 @@ scene.add(myTorus);
 
 // Here you need to re-invoke renderer.render(scene, camera);
 // but instead, better to recursively call it
+// This is known as a 'Game Loop'
 const animate = () => {
-  requestAnimationFrame(animate); // Tell browser to repaint
+  requestAnimationFrame(animate);
+  // Rotate him - this is a single frame of rotation!
+  myTorus.rotation.x += 0.001;
+  myTorus.rotation.y += 0.005;
+  myTorus.rotation.z += 0.001;
   renderer.render(scene, camera);
 };
 animate();
