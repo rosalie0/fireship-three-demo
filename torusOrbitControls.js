@@ -81,28 +81,6 @@ scene.add(lightHelper, gridHelper);
 // MUST add `controls.update()` into the Game Loop
 const controls = new OrbitControls(camera, renderer.domElement);
 
-/*********************** ******* RANDOM GENERATION ********* **********************/
-// These are outside the addStar because no need to define them 200 times:
-const starGeometry = new THREE.SphereGeometry(0.25);
-const starMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-
-// Function that creates & randomly places a single star
-const addStar = () => {
-  // Create a new star instance
-  const star = new THREE.Mesh(starGeometry, starMaterial);
-  // Generate a random [x, y, z] position for each star (with each: -100 < coor < 100)
-  const [x, y, z] = Array(3)
-    .fill()
-    .map(() => THREE.MathUtils.randFloatSpread(100));
-
-  star.position.set(x, y, z); // Place the star using our xyz coordinates
-  scene.add(star); // Add it to the scene
-};
-
-// Call the func a bunch of times to populate our scene
-for (let i = 0; i < 200; i++) addStar();
-// Array(200).fill().forEach(addStar); //<-- Another way of writing the above for loop
-
 /*********************** ******* GAME LOOP ********* **********************/
 
 // Rather than re-invoke renderer.render(scene, camera), better to recursively call it
