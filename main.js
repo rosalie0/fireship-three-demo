@@ -1,6 +1,6 @@
 import "./style.css";
 import * as THREE from "three";
-
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 /***********************  MAKING THE SCENE **********************/
 // The scene holds everything
 const scene = new THREE.Scene();
@@ -38,28 +38,61 @@ const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
 // 2. Make material
 // Again, there's many built in ( you can even make your own)
 // The MeshBasicMaterial does not require light source.
-const material = new THREE.MeshBasicMaterial({
+const basicMaterial = new THREE.MeshBasicMaterial({
   color: 0xff6666,
   wireframe: true,
 });
 
+// Using any mat other than basic, requires a light source
+const standardMaterial = new THREE.MeshStandardMaterial({
+  color: 0xf4f352,
+});
+
+// 2.5 Light source(s)
+//// I. Point Light
+const pointLight = new THREE.PointLight(0xffffff); // makes a 'lightbulb' like light.
+pointLight.position.set(-2, 15, 5); // Position it
+scene.add(pointLight); // Add it to scene
+//// II. Ambient Light
+const ambientLight = new THREE.AmbientLight(0xfffff, 0.5);
+scene.add(ambientLight);
+
 // 3. Make Mesh (using 1 & 2)
 // Combining the geometry with the material is the MESH - which is
 // What we actually want to add to the scene.
-const myTorus = new THREE.Mesh(geometry, material);
+const myTorus = new THREE.Mesh(geometry, standardMaterial);
 
 /*********************** ******* ADDING MESHES TO SCENE ********* **********************/
 scene.add(myTorus);
 
-// Here you need to re-invoke renderer.render(scene, camera);
-// but instead, better to recursively call it
+/*********************** ******* HELPERS FOR IMAGINING 3-D ********* **********************/
+
+// Light Helper - Shows a box of where the light starts from
+const lightHelper = new THREE.PointLightHelper(pointLight);
+
+// Grid Helper - creates a grid (may look like a single line if your camera is flat)
+const gridHelper = new THREE.GridHelper(200, 50);
+
+// Add them
+scene.add(lightHelper, gridHelper);
+
+// With orbit controls imported...
+// Listen to DOM events on the mouse and use it to update the camera's pos
+// MUST add `controls.update()` into the Game Loop
+const controls = new OrbitControls(camera, renderer.domElement);
+
+/*********************** ******* HELPERS FOR IMAGINING 3-D ********* **********************/
+
+// Rather than re-invoke renderer.render(scene, camera), better to recursively call it
 // This is known as a 'Game Loop'
 const animate = () => {
   requestAnimationFrame(animate);
-  // Rotate him - this is a single frame of rotation!
+  // Rotate our torus - this is a single frame of rotation!
   myTorus.rotation.x += 0.001;
   myTorus.rotation.y += 0.005;
   myTorus.rotation.z += 0.001;
+
+  controls.update(); // Animation frame check OrbitControls interaction
   renderer.render(scene, camera);
 };
 animate();
