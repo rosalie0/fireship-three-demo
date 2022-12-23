@@ -82,6 +82,7 @@ scene.add(lightHelper, gridHelper);
 const controls = new OrbitControls(camera, renderer.domElement);
 
 /*********************** ******* RANDOM GENERATION ********* **********************/
+
 // These are outside the addStar because no need to define them 200 times:
 const starGeometry = new THREE.SphereGeometry(0.25);
 const starMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
@@ -103,6 +104,32 @@ const addStar = () => {
 for (let i = 0; i < 200; i++) addStar();
 // Array(200).fill().forEach(addStar); //<-- Another way of writing the above for loop
 
+/*********************** ******* LOADING AN IMAGE FOR A TEXTURE ********* **********************/
+const myTexture = new THREE.TextureLoader(); // Create a texture object (we will re-use it to save space& time)
+myTexture.load("galaxy.png"); // Load a picture on it.
+scene.background = myTexture; // Give it to our scene's bg
+
+//////// BATTER CUBE:
+// Creating another mesh to apply a texture to:
+const cubeGeomtery = new THREE.BoxGeometry(5, 5, 5); // A 5x5x5 cube
+
+// Give this material the texture, which is nowing loaded a different picture on it.
+const batterCubeMaterial = new THREE.MeshBasicMaterial({
+  map: myTexture.load("batter.png"),
+});
+
+const batterCube = new THREE.Mesh(cubeGeomtery, batterCubeMaterial);
+scene.add(batterCube);
+
+///////// MOON SPHERE:
+const moonGeometry = new THREE.SphereGeometry(4);
+const moonMaterial = new THREE.MeshStandardMaterial({
+  map: myTexture.load("tigereye.jpg"),
+  normalMap: myTexture.load("craters.jpg"), // Gives it a 'depth' feeling of a bumpy texture
+});
+const tigerMoon = new THREE.Mesh(moonGeometry, moonMaterial);
+tigerMoon.position.set(15, 15, 1);
+scene.add(tigerMoon);
 /*********************** ******* GAME LOOP ********* **********************/
 
 // Rather than re-invoke renderer.render(scene, camera), better to recursively call it
@@ -113,6 +140,9 @@ const animate = () => {
   myTorus.rotation.x += 0.001;
   myTorus.rotation.y += 0.005;
   myTorus.rotation.z += 0.001;
+
+  batterCube.rotation.x -= 0.03;
+  batterCube.rotation.y -= 0.02;
 
   controls.update(); // Animation frame check OrbitControls interaction
   renderer.render(scene, camera);
