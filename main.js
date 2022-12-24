@@ -1,6 +1,12 @@
 import "./style.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+
+// because resizing the window, the canvas keep the original size given at the draw moment.
+window.onresize = () => {
+  location.reload();
+};
+
 /***********************  MAKING THE SCENE **********************/
 // The scene holds everything
 const scene = new THREE.Scene();
@@ -23,6 +29,7 @@ renderer.setPixelRatio(window.devicePixelRatio);
 // make canvas 'full screen'
 renderer.setSize(window.innerWidth, window.innerHeight);
 camera.position.setZ(30); // start the camera at a position not 0,0,0 so we can see stuff and not be inside things.
+camera.position.setX(-3);
 
 /*********************** CONNECTING SCENE, CAMERA, AND RENDERER **********************/
 // This actually DRAWS the two pieces we've created!
@@ -64,6 +71,7 @@ const myTorus = new THREE.Mesh(geometry, standardMaterial);
 
 /*********************** ******* ADDING MESHES TO SCENE ********* **********************/
 scene.add(myTorus);
+myTorus.position.set(-10, 0, -20); // position it
 
 /*********************** ******* HELPERS FOR IMAGINING 3-D ********* **********************/
 
@@ -74,12 +82,12 @@ const lightHelper = new THREE.PointLightHelper(pointLight);
 const gridHelper = new THREE.GridHelper(200, 50);
 
 // Add them
-scene.add(lightHelper, gridHelper);
+// scene.add(lightHelper, gridHelper);
 
 // With orbit controls imported...
 // Listen to DOM events on the mouse and use it to update the camera's pos
 // MUST add `controls.update()` into the Game Loop
-const controls = new OrbitControls(camera, renderer.domElement);
+// const controls = new OrbitControls(camera, renderer.domElement);
 
 /*********************** ******* RANDOM GENERATION ********* **********************/
 
@@ -105,31 +113,47 @@ for (let i = 0; i < 200; i++) addStar();
 // Array(200).fill().forEach(addStar); //<-- Another way of writing the above for loop
 
 /*********************** ******* LOADING AN IMAGE FOR A TEXTURE ********* **********************/
-const myTexture = new THREE.TextureLoader(); // Create a texture object (we will re-use it to save space& time)
-myTexture.load("galaxy.png"); // Load a picture on it.
-scene.background = myTexture; // Give it to our scene's bg
+const bgTexture = new THREE.TextureLoader().load("/galaxy.png"); // Load a picture on it.
+scene.background = bgTexture; // Give it to our scene's bg
 
+const myTexture = new THREE.TextureLoader(); // Create a texture object (we will re-use it to save space& time)
 //////// BATTER CUBE:
 // Creating another mesh to apply a texture to:
 const cubeGeomtery = new THREE.BoxGeometry(5, 5, 5); // A 5x5x5 cube
-
 // Give this material the texture, which is nowing loaded a different picture on it.
 const batterCubeMaterial = new THREE.MeshBasicMaterial({
-  map: myTexture.load("batter.png"),
+  map: myTexture.load("/batter.png"),
 });
-
 const batterCube = new THREE.Mesh(cubeGeomtery, batterCubeMaterial);
 scene.add(batterCube);
+batterCube.position.set(9, 3, -5);
 
 ///////// MOON SPHERE:
 const moonGeometry = new THREE.SphereGeometry(4);
 const moonMaterial = new THREE.MeshStandardMaterial({
-  map: myTexture.load("tigereye.jpg"),
-  normalMap: myTexture.load("craters.jpg"), // Gives it a 'depth' feeling of a bumpy texture
+  map: myTexture.load("/tigereye.jpg"),
+  normalMap: myTexture.load("/craters.jpg"), // Gives it a 'depth' feeling of a bumpy texture
 });
 const tigerMoon = new THREE.Mesh(moonGeometry, moonMaterial);
-tigerMoon.position.set(15, 15, 1);
+tigerMoon.position.z = 30;
+tigerMoon.position.x = -10;
 scene.add(tigerMoon);
+
+/*********************** ******* MOVE CAMERA ON SCROLL ********* **********************/
+const moveCamera = () => {
+  const t = document.body.getBoundingClientRect().top; // calculate where user is currently scrolled to
+  // give camera coordinates current top position * a NEGATIVE number
+  // The values to * by can get changed around
+  camera.position.z = t * -0.01;
+  camera.position.x = t * -0.0002;
+  camera.rotation.y = t * -0.0002;
+
+  // Have moon spin as we move camera, too
+  tigerMoon.rotation.x += 0.05;
+  tigerMoon.rotation.y += 0.05;
+};
+document.body.onscroll = moveCamera; // assign this func to DOM's body onscroll
+moveCamera();
 /*********************** ******* GAME LOOP ********* **********************/
 
 // Rather than re-invoke renderer.render(scene, camera), better to recursively call it
@@ -144,7 +168,7 @@ const animate = () => {
   batterCube.rotation.x -= 0.03;
   batterCube.rotation.y -= 0.02;
 
-  controls.update(); // Animation frame check OrbitControls interaction
+  // controls.update(); // Animation frame check OrbitControls interaction
   renderer.render(scene, camera);
 };
 animate();
